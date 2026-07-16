@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#756CFE" />
 <meta name="robots" content="index,follow" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net; style-src 'unsafe-inline'; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://*.g.doubleclick.net https://www.google.com https://www.google.pl https://www.facebook.com; font-src 'self'; connect-src https://api.web3forms.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://connect.facebook.net https://*.facebook.com; frame-src https://td.doubleclick.net https://www.facebook.com; form-action 'self' https://api.web3forms.com; base-uri 'self'; object-src 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://www.googletagmanager.com https://www.googleadservices.com https://*.g.doubleclick.net https://connect.facebook.net; style-src 'unsafe-inline'; img-src 'self' data: https://www.googletagmanager.com https://www.googleadservices.com https://*.google-analytics.com https://*.g.doubleclick.net https://www.google.com https://www.google.pl https://www.facebook.com; font-src 'self'; connect-src https://api.web3forms.com https://www.googleadservices.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.g.doubleclick.net https://www.google.com https://www.google.pl https://connect.facebook.net https://*.facebook.com; frame-src https://td.doubleclick.net https://www.facebook.com; form-action 'self' https://api.web3forms.com; base-uri 'self'; object-src 'none'" />
 
 <link rel="canonical" href="https://ai.softroids.com/" />
 
@@ -735,10 +735,14 @@
   // ====== BANER COOKIES + CONSENT MODE v2 ======
   // WKLEJ TU IDENTYFIKATORY, GDY JE ZDOBĘDZIESZ (puste = nic się nie ładuje)
   var COOKIE_CONFIG = {
-    ga4:       '',   // Google Analytics 4, np. 'G-XXXXXXXXXX'
-    googleAds: '',   // Google Ads,         np. 'AW-XXXXXXXXX'
-    metaPixel: ''    // Meta Pixel (ID),    np. '123456789012345'
+    ga4:       '',                 // Google Analytics 4, np. 'G-XXXXXXXXXX'
+    googleAds: 'AW-835002862',     // Google Ads — tag konta
+    metaPixel: ''                  // Meta Pixel (ID), np. '123456789012345'
   };
+  // Etykieta (label) konwersji "Wyślij formularz" z Google Ads.
+  // Znajdziesz ją w: Cele -> Konwersje -> [akcja] -> instalacja ręczna,
+  // w send_to: 'AW-835002862/XXXXXXXXXXX' — wklej tu samą część po ukośniku.
+  var ADS_CONVERSION_LABEL = '';
   (function(){
     var STORE_KEY = 'sr_cookie_consent_v1';
     var banner = document.getElementById('ckBanner');
@@ -878,6 +882,11 @@
       .then(function(r){ return r.json(); })
       .then(function(data){
         if(!data.success) throw new Error(data.message || 'error');
+        // Konwersja Google Ads (odpali się, gdy ADS_CONVERSION_LABEL jest uzupełnione;
+        // przy braku zgody na cookies Consent Mode zliczy ją w trybie modelowanym)
+        if(typeof gtag === 'function' && COOKIE_CONFIG.googleAds && ADS_CONVERSION_LABEL){
+          gtag('event', 'conversion', { send_to: COOKIE_CONFIG.googleAds + '/' + ADS_CONVERSION_LABEL });
+        }
         form.reset();
         show('ok','<strong>Dziękujemy!</strong> Zgłoszenie dotarło — odezwiemy się w ciągu 1 dnia roboczego.');
       })
